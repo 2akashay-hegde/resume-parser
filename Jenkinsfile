@@ -9,16 +9,28 @@ pipeline {
   }
 
   stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
     stage('Unit Test') {
       steps {
         script {
           if (isUnix()) {
-            sh '''
-              docker run --rm -v "$PWD":/app -w /app python:3.11-slim bash -lc \
+            docker.image('python:3.11-slim').inside {
+              sh '''
+                python -m pip install --upgrade pip
+                python -m pip install -r app/requirements.txt
+                python -m pytest -q
+              '''
+            }
+          } else {
+            bat '''
+              docker run --rm -v "%cd%":/app -w /app python:3.11-slim bash -lc \
               "python -m pip install --upgrade pip && python -m pip install -r app/requirements.txt && python -m pytest -q"
             '''
-          } else {
-            bat 'docker run --rm -v "%cd%":/app -w /app python:3.11-slim bash -lc "python -m pip install --upgrade pip && python -m pip install -r app/requirements.txt && python -m pytest -q"'
           }
         }
       }
@@ -28,7 +40,7 @@ pipeline {
       steps {
         script {
           if (isUnix()) {
-            sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+            docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
           } else {
             bat "docker build -t %DOCKER_IMAGE%:%DOCKER_TAG% ."
           }
@@ -38,7 +50,10 @@ pipeline {
 
     stage('Push Docker Image') {
       when {
-        expression { env.BRANCH_NAME == 'main' }
+        anyOf {
+          branch 'main'
+          branch 'master'
+        }
       }
       steps {
         withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
