@@ -1,6 +1,14 @@
 version: '3.8'
 services:
-  app:
+  api:
     build: .
-    volumes:
-      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: yourpassword
+    ports:
+      - "5432:5432"
