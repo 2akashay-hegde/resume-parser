@@ -1,5 +1,43 @@
+# Python bytecode and caches
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 *.pyo
 *.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment and secrets
 .env
+.env.*
+*.env
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local uploads and generated data
+uploads/
+uploaded/
+resume_files/
+processed/
+out/
+*.pdf
+*.docx
+*.doc
+*.txt
+
+# Test and coverage outputs
+.pytest_cache/
+.coverage
+htmlcov/
